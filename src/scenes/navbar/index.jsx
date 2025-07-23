@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
+import NotificationWidget from "components/NotificationWidget";
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
@@ -59,6 +60,9 @@ const Navbar = () => {
       {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
         <FlexBetween gap="2rem">
+          {/* ADD NOTIFICATION WIDGET HERE */}
+          <NotificationWidget />
+          
           <IconButton onClick={() => dispatch(setMode())}>
             {theme.palette.mode === "dark" ? (
               <DarkMode sx={{ fontSize: "25px" }} />
@@ -128,6 +132,9 @@ const Navbar = () => {
             alignItems="center"
             gap="3rem"
           >
+            {/* ADD NOTIFICATION WIDGET FOR MOBILE TOO */}
+            <NotificationWidget />
+            
             <IconButton
               onClick={() => dispatch(setMode())}
               sx={{ fontSize: "25px" }}
