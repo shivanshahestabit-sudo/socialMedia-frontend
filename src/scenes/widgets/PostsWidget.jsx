@@ -37,6 +37,14 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     }
   }, []);
 
+  const refreshPosts = () => {
+    if (isProfile) {
+      getUserPosts();
+    } else {
+      getPosts();
+    }
+  };
+
   return (
     <>
       {posts.map(
@@ -63,6 +71,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
             userPicturePath={userPicturePath}
             likes={likes}
             comments={comments}
+            refreshPosts={refreshPosts}
           />
         )
       )}
