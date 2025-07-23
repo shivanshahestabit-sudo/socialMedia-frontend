@@ -5,6 +5,7 @@ import UserWidget from "scenes/widgets/UserWidget";
 import MyPostWidget from "scenes/widgets/MyPostWidget";
 import PostsWidget from "scenes/widgets/PostsWidget";
 import ProtectedRoute from "protection/protectedRoutes";
+import ChatWidget from "scenes/widgets/ChatWidget";
 
 const HomePage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
@@ -25,11 +26,14 @@ const HomePage = () => {
             <UserWidget userId={_id} picturePath={picturePath} />
           </Box>
           <Box
-            flexBasis={isNonMobileScreens ? "65%" : undefined}
+            flexBasis={isNonMobileScreens ? "55%" : undefined}
             mt={isNonMobileScreens ? undefined : "2rem"}
           >
             <MyPostWidget picturePath={picturePath} />
             <PostsWidget userId={_id} />
+          </Box>
+          <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+            <ChatWidget userId={_id} picturePath={picturePath} />
           </Box>
         </Box>
       </Box>

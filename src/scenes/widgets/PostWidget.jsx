@@ -8,16 +8,21 @@ import {
   Typography,
   InputBase,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import {
   ChatBubbleOutlineOutlined,
   FavoriteBorderOutlined,
   Favorite,
   Send,
-  ShareOutlined,
+  DeleteOutlined,
 } from "@mui/icons-material";
 import WidgetWrapper from "components/WidgetWrapper";
-import Friend from "components/Friend";
 import FlexBetween from "components/FlexBetween";
 
 const PostWidget = ({
@@ -31,15 +36,18 @@ const PostWidget = ({
   likes,
   comments,
   refreshPosts,
-
 }) => {
   const [isComments, setIsComments] = useState(false);
   const [comment, setComment] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
+
+  // Check if the current user owns this post
+  const isOwner = postUserId === loggedInUserId;
 
   const { palette } = useTheme();
   const main = palette.neutral.main;
@@ -88,6 +96,34 @@ const PostWidget = ({
     }
   };
 
+  const handleDeletePost = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: loggedInUserId }),
+      });
+
+      if (response.ok) {
+        // Close the dialog
+        setDeleteDialogOpen(false);
+        
+        // Refresh the posts list
+        if (refreshPosts) {
+          refreshPosts();
+        }
+      } else {
+        const errorData = await response.json();
+        console.error("Error deleting post:", errorData.message);
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
+
   const handleKeyPress = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -97,25 +133,10 @@ const PostWidget = ({
 
   return (
     <WidgetWrapper m="2rem 0">
-      <Friend
-        friendId={postUserId}
-        name={name}
-        subtitle={location}
-        userPicturePath={userPicturePath}
-      />
-      <Typography color={main} sx={{ mt: "1rem" }}>
+      <Typography color={main} sx={{ mt: "0rem", fontSize: "1.25rem" }}>
         {description}
       </Typography>
-      {picturePath && (
-        <img
-          width="100%"
-          height="auto"
-          alt="post"
-          style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-          src={`http://localhost:3001/assets/${picturePath}`}
-        />
-      )}
-      <FlexBetween mt="0.25rem">
+      <FlexBetween mt="1rem">
         <FlexBetween gap="1rem">
           <FlexBetween gap="0.3rem">
             <IconButton onClick={patchLike}>
@@ -136,9 +157,22 @@ const PostWidget = ({
           </FlexBetween>
         </FlexBetween>
 
-        <IconButton>
-          <ShareOutlined />
-        </IconButton>
+        {isOwner && (
+          <IconButton
+            onClick={() => setDeleteDialogOpen(true)}
+            sx={{
+              backgroundColor: "#ff4444",
+              color: "white",
+              width: "40px",
+              height: "40px",
+              "&:hover": {
+                backgroundColor: "#cc0000",
+              },
+            }}
+          >
+            <DeleteOutlined />
+          </IconButton>
+        )}
       </FlexBetween>
       
       {isComments && (
@@ -202,6 +236,38 @@ const PostWidget = ({
           ))}
         </Box>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Delete Post
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete this post? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)} 
+            color="primary"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeletePost} 
+            color="error" 
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </WidgetWrapper>
   );
 };
