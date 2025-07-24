@@ -21,16 +21,24 @@ const HomePage = () => {
           display={isNonMobileScreens ? "flex" : "block"}
           gap="0.5rem"
           justifyContent="start"
+          minHeight="calc(100vh - 80px)"
         >
-          <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+          <Box flexBasis={isNonMobileScreens ? "15%" : undefined}>
             <UserWidget userId={_id} picturePath={picturePath} />
           </Box>
           <Box
             flexBasis={isNonMobileScreens ? "55%" : undefined}
             mt={isNonMobileScreens ? undefined : "2rem"}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: isNonMobileScreens ? "calc(100vh - 120px)" : "auto",
+            }}
           >
-            <MyPostWidget picturePath={picturePath} />
-            <PostsWidget userId={_id} />
+            <Box sx={{ flex: 1 }}>
+              <MyPostWidget picturePath={picturePath} />
+              <PostsWidget userId={_id} />
+            </Box>
           </Box>
           <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
             <ChatWidget userId={_id} picturePath={picturePath} />

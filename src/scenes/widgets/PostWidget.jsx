@@ -46,7 +46,6 @@ const PostWidget = ({
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
 
-  // Check if the current user owns this post
   const isOwner = postUserId === loggedInUserId;
 
   const { palette } = useTheme();
@@ -108,10 +107,8 @@ const PostWidget = ({
       });
 
       if (response.ok) {
-        // Close the dialog
         setDeleteDialogOpen(false);
         
-        // Refresh the posts list
         if (refreshPosts) {
           refreshPosts();
         }
@@ -237,7 +234,6 @@ const PostWidget = ({
         </Box>
       )}
 
-      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
