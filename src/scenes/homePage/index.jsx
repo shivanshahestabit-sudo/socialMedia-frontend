@@ -20,7 +20,7 @@ const HomePage = () => {
           padding="2rem 6%"
           display={isNonMobileScreens ? "flex" : "block"}
           gap="0.5rem"
-          justifyContent="start"
+          justifyContent="center"
           minHeight="calc(100vh - 80px)"
         >
           <Box flexBasis={isNonMobileScreens ? "15%" : undefined}>

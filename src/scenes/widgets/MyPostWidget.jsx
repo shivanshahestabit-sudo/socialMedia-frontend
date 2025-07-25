@@ -54,6 +54,13 @@ const MyPostWidget = ({ picturePath }) => {
     setPost("");
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey && post.trim()) {
+      e.preventDefault();
+      handlePost();
+    }
+  };
+
   return (
     <WidgetWrapper>
       <FlexBetween gap="1.5rem">
@@ -61,6 +68,7 @@ const MyPostWidget = ({ picturePath }) => {
         <InputBase
           placeholder="Post something..."
           onChange={(e) => setPost(e.target.value)}
+          onKeyDown={handleKeyDown}
           value={post}
           sx={{
             width: "100%",
@@ -118,16 +126,6 @@ const MyPostWidget = ({ picturePath }) => {
       <Divider sx={{ margin: "1.25rem 0" }} />
 
       <FlexBetween>
-        <FlexBetween gap="0.25rem" onClick={() => setIsImage(!isImage)}>
-          <ImageOutlined sx={{ color: mediumMain }} />
-          <Typography
-            color={mediumMain}
-            sx={{ "&:hover": { cursor: "pointer", color: medium } }}
-          >
-            Image
-          </Typography>
-        </FlexBetween>
-
         {isNonMobileScreens ? (
           <>
           </>

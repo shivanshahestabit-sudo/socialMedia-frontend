@@ -1,47 +1,49 @@
 import {
-  ManageAccountsOutlined,
   LocationOnOutlined,
   WorkOutlineOutlined,
+  EditOutlined,
 } from "@mui/icons-material";
-import { Box, Typography, Divider, useTheme } from "@mui/material";
+import { Box, Typography, Divider, useTheme, IconButton } from "@mui/material";
 import UserImage from "components/UserImage";
 import FlexBetween from "components/FlexBetween";
 import WidgetWrapper from "components/WidgetWrapper";
+import EditProfileDialog from "components/EditProfile";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const UserWidget = ({ userId, picturePath }) => {
   const [user, setUser] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   const { palette } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const token = useSelector((state) => state.token);
   const dark = palette.neutral.dark;
   const medium = palette.neutral.medium;
   const main = palette.neutral.main;
 
   const getUser = async () => {
-    const response = await fetch(`http://localhost:3001/users/${userId}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    setUser(data);
+    try {
+      const response = await fetch(`http://localhost:3001/users/${userId}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      setUser(data);
+    } catch (err) {
+      console.error("Failed to fetch user", err);
+    }
   };
 
   useEffect(() => {
     getUser();
   }, []);
-  if (!user) {
-    return null;
-  }
 
-  const {
-    firstName,
-    lastName,
-    location,
-    occupation,
-  } = user;
+  if (!user) return null;
+
+  const { firstName, lastName, location: userLocation, occupation } = user;
 
   return (
     <WidgetWrapper>
@@ -50,9 +52,16 @@ const UserWidget = ({ userId, picturePath }) => {
         pb="1.1rem"
         onClick={() => navigate(`/profile/${userId}`)}
       >
-        <FlexBetween gap="1rem">
+        <FlexBetween gap={location.pathname !== "/home" ? "3rem" : "1rem"}>
           <UserImage image={picturePath} />
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
             <Typography
               variant="h4"
               color={dark}
@@ -67,6 +76,22 @@ const UserWidget = ({ userId, picturePath }) => {
               {firstName} {lastName}
             </Typography>
           </Box>
+          {location.pathname !== "/home" && (
+            <IconButton
+              onClick={() => setEditDialogOpen(true)}
+              sx={{
+                backgroundColor: "#00D5FA",
+                color: "white",
+                width: "40px",
+                height: "40px",
+                "&:hover": {
+                  backgroundColor: "#00d4fad2",
+                },
+              }}
+            >
+              <EditOutlined />
+            </IconButton>
+          )}
         </FlexBetween>
       </FlexBetween>
 
@@ -75,7 +100,7 @@ const UserWidget = ({ userId, picturePath }) => {
       <Box p="1rem 0">
         <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
           <LocationOnOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{location}</Typography>
+          <Typography color={medium}>{userLocation}</Typography>
         </Box>
         <Box display="flex" alignItems="center" gap="1rem">
           <WorkOutlineOutlined fontSize="large" sx={{ color: main }} />
@@ -83,6 +108,13 @@ const UserWidget = ({ userId, picturePath }) => {
         </Box>
       </Box>
 
+      <EditProfileDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        user={user}
+        token={token}
+        setUser={setUser}
+      />
     </WidgetWrapper>
   );
 };

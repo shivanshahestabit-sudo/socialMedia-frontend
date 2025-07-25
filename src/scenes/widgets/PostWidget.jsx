@@ -21,6 +21,7 @@ import {
   Favorite,
   Send,
   DeleteOutlined,
+  EditOutlined,
 } from "@mui/icons-material";
 import WidgetWrapper from "components/WidgetWrapper";
 import FlexBetween from "components/FlexBetween";
@@ -40,6 +41,9 @@ const PostWidget = ({
   const [isComments, setIsComments] = useState(false);
   const [comment, setComment] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editedDescription, setEditedDescription] = useState(description);
+  const [editedPicturePath, setEditedPicturePath] = useState(picturePath); // Optional
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -69,23 +73,26 @@ const PostWidget = ({
     if (!comment.trim()) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/posts/${postId}/comment`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          userId: loggedInUserId, 
-          comment: comment.trim() 
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:3001/posts/${postId}/comment`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: loggedInUserId,
+            comment: comment.trim(),
+          }),
+        }
+      );
 
       if (response.ok) {
         const updatedPost = await response.json();
         dispatch(setPost({ post: updatedPost }));
         setComment("");
-        
+
         if (refreshPosts) {
           refreshPosts();
         }
@@ -108,7 +115,7 @@ const PostWidget = ({
 
       if (response.ok) {
         setDeleteDialogOpen(false);
-        
+
         if (refreshPosts) {
           refreshPosts();
         }
@@ -128,11 +135,68 @@ const PostWidget = ({
     }
   };
 
+  const handleEditPost = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/posts/${postId}/${loggedInUserId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            description: editedDescription,
+            picturePath: editedPicturePath,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        dispatch(setPost({ post: data.post }));
+        refreshPosts?.();
+        setEditDialogOpen(false);
+      } else {
+        console.error("Error updating post:", data.message);
+      }
+    } catch (err) {
+      console.error("Failed to update post:", err.message);
+    }
+  };
+
   return (
     <WidgetWrapper m="2rem 0">
-      <Typography color={main} sx={{ mt: "0rem", fontSize: "1.25rem" }}>
-        {description}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        <Typography color={main} sx={{ fontSize: "1.25rem" }}>
+          {description}
+        </Typography>
+
+        {isOwner && (
+          <IconButton
+            onClick={() => setEditDialogOpen(true)}
+            sx={{
+              backgroundColor: "#00D5FA",
+              color: "white",
+              width: "40px",
+              height: "40px",
+              "&:hover": {
+                backgroundColor: "#00d4fad2",
+              },
+            }}
+          >
+            <EditOutlined />
+          </IconButton>
+        )}
+      </Box>
+
       <FlexBetween mt="1rem">
         <FlexBetween gap="1rem">
           <FlexBetween gap="0.3rem">
@@ -171,7 +235,7 @@ const PostWidget = ({
           </IconButton>
         )}
       </FlexBetween>
-      
+
       {isComments && (
         <Box mt="0.5rem">
           <FlexBetween gap="1rem" mb="1rem">
@@ -187,11 +251,11 @@ const PostWidget = ({
                 padding: "0.5rem 1rem",
               }}
             />
-            <IconButton 
+            <IconButton
               onClick={handleAddComment}
               disabled={!comment.trim()}
-              sx={{ 
-                color: comment.trim() ? primary : palette.neutral.medium 
+              sx={{
+                color: comment.trim() ? primary : palette.neutral.medium,
               }}
             >
               <Send />
@@ -207,25 +271,14 @@ const PostWidget = ({
               <Divider />
               <Box p="0.5rem 0">
                 <FlexBetween>
-                  <Typography 
-                    variant="body2" 
-                    fontWeight="bold"
-                    color={primary}
-                  >
+                  <Typography variant="body2" fontWeight="bold" color={primary}>
                     {comment.firstName} {comment.lastName}
                   </Typography>
-                  <Typography 
-                    variant="caption" 
-                    color={palette.neutral.medium}
-                  >
+                  <Typography variant="caption" color={palette.neutral.medium}>
                     {new Date(comment.createdAt).toLocaleDateString()}
                   </Typography>
                 </FlexBetween>
-                <Typography 
-                  variant="body2" 
-                  color={main}
-                  sx={{ mt: "0.25rem" }}
-                >
+                <Typography variant="body2" color={main} sx={{ mt: "0.25rem" }}>
                   {comment.comment}
                 </Typography>
               </Box>
@@ -240,29 +293,66 @@ const PostWidget = ({
         aria-labelledby="delete-dialog-title"
         aria-describedby="delete-dialog-description"
       >
-        <DialogTitle id="delete-dialog-title">
-          Delete Post
-        </DialogTitle>
+        <DialogTitle id="delete-dialog-title">Delete Post</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete this post? This action cannot be undone.
+            Are you sure you want to delete this post? This action cannot be
+            undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setDeleteDialogOpen(false)} 
-            color="primary"
-          >
+          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={handleDeletePost} 
-            color="error" 
-            variant="contained"
-          >
+          <Button onClick={handleDeletePost} color="error" variant="contained">
             Delete
           </Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+        <DialogTitle>Edit Post</DialogTitle>
+        <Box
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleEditPost();
+          }}
+        >
+          <DialogContent>
+            <InputBase
+              placeholder="Edit description"
+              fullWidth
+              multiline
+              value={editedDescription}
+              onChange={(e) => setEditedDescription(e.target.value)}
+              sx={{
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                padding: "8px",
+                marginTop: "10px",
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setEditDialogOpen(false)} color="primary">
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                backgroundColor: "#00D5FA",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "#00c3e6",
+                },
+              }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Box>
       </Dialog>
     </WidgetWrapper>
   );

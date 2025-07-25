@@ -1,4 +1,4 @@
-import { Box, useMediaQuery } from "@mui/material";
+import { Box, useMediaQuery, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -33,6 +33,12 @@ const ProfilePage = () => {
     <ProtectedRoute>
       <Box>
         <Navbar />
+        <Box width="100%" textAlign="center" mt="1rem" mb="-1rem">
+          <Typography variant="h3" fontWeight="bold">
+            My Page
+          </Typography>
+        </Box>
+
         <Box
           width="100%"
           padding="2rem 6%"

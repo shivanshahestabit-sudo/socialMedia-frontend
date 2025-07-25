@@ -21,7 +21,6 @@ const ChatPage = () => {
   const token = useSelector((state) => state.token);
   const messageBoxRef = useRef(null);
 
-  const main = palette.neutral.main;
   const medium = palette.neutral.medium;
 
   useEffect(() => {
@@ -33,7 +32,7 @@ const ChatPage = () => {
       setUsers(data);
     };
     fetchChatUsers();
-  }, []);
+  }, [token]);
 
   const fetchMessages = async (userId) => {
     const res = await fetch(`http://localhost:3001/chat/messages/${userId}`, {
