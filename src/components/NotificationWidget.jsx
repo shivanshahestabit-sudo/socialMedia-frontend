@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Badge,
   IconButton,
@@ -8,16 +8,18 @@ import {
   Box,
   Divider,
   useTheme,
-} from '@mui/material';
-import { NotificationsOutlined, Circle } from '@mui/icons-material';
-import { useSocket } from '../context/SocketContext';
-import { useNavigate } from 'react-router-dom';
+} from "@mui/material";
+import { NotificationsOutlined, Circle } from "@mui/icons-material";
+import { useSocket } from "../context/SocketContext";
+import { useNavigate } from "react-router-dom";
 
 const NotificationWidget = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useSocket();
   const theme = useTheme();
   const navigate = useNavigate();
+
+  console.log("notifications", notifications);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -46,7 +48,7 @@ const NotificationWidget = () => {
           <NotificationsOutlined />
         </Badge>
       </IconButton>
-      
+
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -59,16 +61,20 @@ const NotificationWidget = () => {
         }}
       >
         <Box p={2}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="h6">Notifications</Typography>
             {unreadCount > 0 && (
               <Typography
                 variant="caption"
                 onClick={handleMarkAllRead}
-                sx={{ 
-                  cursor: 'pointer',
+                sx={{
+                  cursor: "pointer",
                   color: theme.palette.primary.main,
-                  '&:hover': { textDecoration: 'underline' }
+                  "&:hover": { textDecoration: "underline" },
                 }}
               >
                 Mark all as read
@@ -76,9 +82,9 @@ const NotificationWidget = () => {
             )}
           </Box>
         </Box>
-        
+
         <Divider />
-        
+
         {notifications.length === 0 ? (
           <MenuItem>
             <Typography variant="body2" color="textSecondary">
@@ -91,25 +97,30 @@ const NotificationWidget = () => {
               key={notification._id}
               onClick={() => handleNotificationClick(notification)}
               sx={{
-                backgroundColor: notification.read ? 'transparent' : theme.palette.action.hover,
-                '&:hover': {
+                backgroundColor: notification.read
+                  ? "transparent"
+                  : theme.palette.action.hover,
+                "&:hover": {
                   backgroundColor: theme.palette.action.selected,
                 },
               }}
             >
               <Box display="flex" alignItems="flex-start" width="100%">
                 {!notification.read && (
-                  <Circle 
-                    sx={{ 
-                      color: theme.palette.primary.main, 
-                      fontSize: 8, 
-                      mr: 1, 
-                      mt: 1 
-                    }} 
+                  <Circle
+                    sx={{
+                      color: theme.palette.primary.main,
+                      fontSize: 8,
+                      mr: 1,
+                      mt: 1,
+                    }}
                   />
                 )}
                 <Box flex={1}>
-                  <Typography variant="body2" fontWeight={notification.read ? 'normal' : 'bold'}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={notification.read ? "normal" : "bold"}
+                  >
                     {notification.message}
                   </Typography>
                   <Typography variant="caption" color="textSecondary">
@@ -120,11 +131,11 @@ const NotificationWidget = () => {
             </MenuItem>
           ))
         )}
-        
+
         {notifications.length > 10 && (
           <>
             <Divider />
-            <MenuItem onClick={() => navigate('/notifications')}>
+            <MenuItem onClick={() => navigate("/notifications")}>
               <Typography variant="body2" color="primary">
                 View all notifications
               </Typography>

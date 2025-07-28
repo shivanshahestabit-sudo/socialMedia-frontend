@@ -8,6 +8,8 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { themeSettings } from "./theme";
 import { SocketProvider } from "./context/SocketContext";
+import { SnackbarProvider } from "./context/SnackbarContext";
+import GlobalSnackbar from "./components/GlobalSnackbar";
 
 function App() {
   const mode = useSelector((state) => state.mode);
@@ -19,21 +21,24 @@ function App() {
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {isAuth && (
-            <SocketProvider>
+          <SnackbarProvider>
+            <GlobalSnackbar />
+
+            {isAuth ? (
+              <SocketProvider>
+                <Routes>
+                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/profile/:userId" element={<ProfilePage />} />
+                  <Route path="/" element={<Navigate to="/home" />} />
+                </Routes>
+              </SocketProvider>
+            ) : (
               <Routes>
-                <Route path="/home" element={<HomePage />} />
-                <Route path="/profile/:userId" element={<ProfilePage />} />
-                <Route path="/" element={<Navigate to="/home" />} />
+                <Route path="/home" element={<LoginPage />} />
+                <Route path="/" element={<LoginPage />} />
               </Routes>
-            </SocketProvider>
-          )}
-          {!isAuth && (
-            <Routes>
-              <Route path="/home" element={<LoginPage />} />
-              <Route path="/" element={<LoginPage />} />
-            </Routes>
-          )}
+            )}
+          </SnackbarProvider>
         </ThemeProvider>
       </BrowserRouter>
     </div>

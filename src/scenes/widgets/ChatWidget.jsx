@@ -25,11 +25,22 @@ const ChatPage = () => {
 
   useEffect(() => {
     const fetchChatUsers = async () => {
-      const res = await fetch("http://localhost:3001/chat/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setUsers(data);
+      try {
+        const res = await fetch("http://localhost:3001/chat/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else {
+          console.error("Expected an array but got:", data);
+          setUsers([]);
+        }
+      } catch (error) {
+        console.error("Error fetching chat users:", error);
+        setUsers([]);
+      }
     };
     fetchChatUsers();
   }, [token]);
@@ -82,12 +93,7 @@ const ChatPage = () => {
           Chats
         </Typography>
         <Divider />
-        <Box
-          display="flex"
-          gap={2}
-          mt={1}
-          sx={{ overflowX: "auto", px: 1 }}
-        >
+        <Box display="flex" gap={2} mt={1} sx={{ overflowX: "auto", px: 1 }}>
           {users.map((user) => (
             <Box
               key={user._id}
@@ -128,13 +134,7 @@ const ChatPage = () => {
               Chat with {selectedUser.firstName} {selectedUser.lastName}
             </Typography>
             <Divider />
-            <Box
-              ref={messageBoxRef}
-              flexGrow={1}
-              overflow="auto"
-              mt={2}
-              pr={1}
-            >
+            <Box ref={messageBoxRef} flexGrow={1} overflow="auto" mt={2} pr={1}>
               {messages.map((msg, index) => (
                 <Box
                   key={index}

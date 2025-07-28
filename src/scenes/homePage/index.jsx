@@ -1,15 +1,28 @@
-import { Box, useMediaQuery } from "@mui/material";
+import React, { lazy, Suspense, useEffect, useState } from "react";
+import { Box, useMediaQuery, Backdrop } from "@mui/material";
 import { useSelector } from "react-redux";
 import Navbar from "scenes/navbar";
-import UserWidget from "scenes/widgets/UserWidget";
-import MyPostWidget from "scenes/widgets/MyPostWidget";
-import PostsWidget from "scenes/widgets/PostsWidget";
 import ProtectedRoute from "protection/protectedRoutes";
-import ChatWidget from "scenes/widgets/ChatWidget";
+import CustomLoader from "components/CustomLoader";
+
+const UserWidget = lazy(() => import("scenes/widgets/UserWidget"));
+const MyPostWidget = lazy(() => import("scenes/widgets/MyPostWidget"));
+const PostsWidget = lazy(() => import("scenes/widgets/PostsWidget"));
+const ChatWidget = lazy(() => import("scenes/widgets/ChatWidget"));
 
 const HomePage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ProtectedRoute>
@@ -23,27 +36,43 @@ const HomePage = () => {
           justifyContent="center"
           minHeight="calc(100vh - 80px)"
         >
-          <Box flexBasis={isNonMobileScreens ? "15%" : undefined}>
-            <UserWidget userId={_id} picturePath={picturePath} />
-          </Box>
-          <Box
-            flexBasis={isNonMobileScreens ? "55%" : undefined}
-            mt={isNonMobileScreens ? undefined : "2rem"}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              minHeight: isNonMobileScreens ? "calc(100vh - 120px)" : "auto",
-            }}
-          >
-            <Box sx={{ flex: 1 }}>
-              <MyPostWidget picturePath={picturePath} />
-              <PostsWidget userId={_id} />
+          <Suspense fallback={<></>}>
+            <Box flexBasis={isNonMobileScreens ? "15%" : undefined}>
+              <UserWidget userId={_id} picturePath={picturePath} />
             </Box>
-          </Box>
-          <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-            <ChatWidget userId={_id} picturePath={picturePath} />
-          </Box>
+
+            <Box
+              flexBasis={isNonMobileScreens ? "55%" : undefined}
+              mt={isNonMobileScreens ? undefined : "2rem"}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                minHeight: isNonMobileScreens ? "calc(100vh - 120px)" : "auto",
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <MyPostWidget picturePath={picturePath} />
+                <PostsWidget userId={_id} />
+              </Box>
+            </Box>
+
+            <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+              <ChatWidget userId={_id} picturePath={picturePath} />
+            </Box>
+          </Suspense>
         </Box>
+
+        {loading && (
+          <Backdrop
+            sx={(theme) => ({
+              color: "#fff",
+              zIndex: theme.zIndex.drawer + 1,
+            })}
+            open={loading}
+          >
+            <CustomLoader />
+          </Backdrop>
+        )}
       </Box>
     </ProtectedRoute>
   );

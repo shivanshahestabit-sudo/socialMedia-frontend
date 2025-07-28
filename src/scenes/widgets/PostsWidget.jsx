@@ -34,16 +34,22 @@ const PostsWidget = ({ userId, isProfile = false }) => {
       );
       const data = await response.json();
 
-      if (data.posts) {
+      if (Array.isArray(data.posts)) {
         dispatch(setPosts({ posts: data.posts }));
         setTotalPosts(data.totalPosts);
         setTotalPages(data.totalPages);
         setCurrentPage(data.currentPage);
-      } else {
+      } else if (Array.isArray(data)) {
         dispatch(setPosts({ posts: data }));
         setTotalPosts(data.length);
         setTotalPages(1);
         setCurrentPage(1);
+      } else {
+        dispatch(setPosts({ posts: [] }));
+        setTotalPosts(0);
+        setTotalPages(1);
+        setCurrentPage(1);
+        console.warn("Unexpected post data format", data);
       }
     } catch (error) {
       console.error("Error fetching posts:", error);
