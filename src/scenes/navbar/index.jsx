@@ -10,12 +10,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import {
-  DarkMode,
-  LightMode,
-  Menu,
-  Close,
-} from "@mui/icons-material";
+import { DarkMode, LightMode, Menu, Close } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "state";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +33,36 @@ const Navbar = () => {
 
   const fullName = `${user.firstName} ${user.lastName}`;
 
+  const handleLogout = async () => {
+    try {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.disableAutoSelect();
+      } else if (window.gapi && window.gapi.auth2) {
+        const authInstance = window.gapi.auth2.getAuthInstance();
+        if (authInstance) {
+          await authInstance.signOut();
+        }
+      }
+      dispatch(setLogout());
+      localStorage.clear();
+      sessionStorage.clear();
+
+      document.cookie.split(";").forEach((c) => {
+        const eqPos = c.indexOf("=");
+        const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+        document.cookie =
+          name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      });
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      dispatch(setLogout());
+      localStorage.clear();
+      window.location.href = "/";
+    }
+  };
+
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
       <FlexBetween gap="1.75rem">
@@ -57,12 +82,10 @@ const Navbar = () => {
         </Typography>
       </FlexBetween>
 
-      {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
         <FlexBetween gap="2rem">
-          {/* ADD NOTIFICATION WIDGET HERE */}
           <NotificationWidget />
-          
+
           <IconButton onClick={() => dispatch(setMode())}>
             {theme.palette.mode === "dark" ? (
               <DarkMode sx={{ fontSize: "25px" }} />
@@ -91,7 +114,7 @@ const Navbar = () => {
               <MenuItem value={fullName}>
                 <Typography>{fullName}</Typography>
               </MenuItem>
-              <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
+              <MenuItem onClick={() => handleLogout()}>Log Out</MenuItem>
             </Select>
           </FormControl>
         </FlexBetween>
@@ -134,7 +157,7 @@ const Navbar = () => {
           >
             {/* ADD NOTIFICATION WIDGET FOR MOBILE TOO */}
             <NotificationWidget />
-            
+
             <IconButton
               onClick={() => dispatch(setMode())}
               sx={{ fontSize: "25px" }}
@@ -166,9 +189,7 @@ const Navbar = () => {
                 <MenuItem value={fullName}>
                   <Typography>{fullName}</Typography>
                 </MenuItem>
-                <MenuItem onClick={() => dispatch(setLogout())}>
-                  Log Out
-                </MenuItem>
+                <MenuItem onClick={() => handleLogout()}>Log Out</MenuItem>
               </Select>
             </FormControl>
           </FlexBetween>

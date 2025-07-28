@@ -1,6 +1,9 @@
 import { Box } from "@mui/material";
 
 const UserImage = ({ image, size = "60px" }) => {
+  const isExternalUrl =
+    image?.startsWith("http://") || image?.startsWith("https://");
+
   return (
     <Box width={size} height={size}>
       <img
@@ -8,7 +11,7 @@ const UserImage = ({ image, size = "60px" }) => {
         width={size}
         height={size}
         alt="user"
-        src={`http://localhost:3001/assets/${image}`}
+        src={isExternalUrl ? image : `http://localhost:3001/assets/${image}`}
       />
     </Box>
   );
