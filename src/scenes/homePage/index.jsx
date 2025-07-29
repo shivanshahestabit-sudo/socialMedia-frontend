@@ -9,10 +9,12 @@ const UserWidget = lazy(() => import("scenes/widgets/UserWidget"));
 const MyPostWidget = lazy(() => import("scenes/widgets/MyPostWidget"));
 const PostsWidget = lazy(() => import("scenes/widgets/PostsWidget"));
 const ChatWidget = lazy(() => import("scenes/widgets/ChatWidget"));
+const AdminComponent = lazy(() => import("scenes/widgets/AdminWidget"));
 
 const HomePage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
+  const role = useSelector((state) => state.role);
 
   const [loading, setLoading] = useState(true);
 
@@ -24,43 +26,61 @@ const HomePage = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const renderUserContent = () => (
+    <Box
+      width="100%"
+      padding="2rem 6%"
+      display={isNonMobileScreens ? "flex" : "block"}
+      gap="0.5rem"
+      justifyContent="center"
+      minHeight="calc(100vh - 80px)"
+    >
+      <Suspense fallback={<></>}>
+        <Box flexBasis={isNonMobileScreens ? "15%" : undefined}>
+          <UserWidget userId={_id} picturePath={picturePath} />
+        </Box>
+
+        <Box
+          flexBasis={isNonMobileScreens ? "55%" : undefined}
+          mt={isNonMobileScreens ? undefined : "2rem"}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: isNonMobileScreens ? "calc(100vh - 120px)" : "auto",
+          }}
+        >
+          <Box sx={{ flex: 1 }}>
+            <MyPostWidget picturePath={picturePath} />
+            <PostsWidget userId={_id} />
+          </Box>
+        </Box>
+
+        <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+          <ChatWidget userId={_id} picturePath={picturePath} />
+        </Box>
+      </Suspense>
+    </Box>
+  );
+
+  const renderAdminContent = () => (
+    <Box
+      width="100%"
+      padding="2rem 6%"
+      display="flex"
+      justifyContent="center"
+      minHeight="calc(100vh - 80px)"
+    >
+      <Suspense fallback={<></>}>
+        <AdminComponent />
+      </Suspense>
+    </Box>
+  );
+
   return (
     <ProtectedRoute>
       <Box>
         <Navbar />
-        <Box
-          width="100%"
-          padding="2rem 6%"
-          display={isNonMobileScreens ? "flex" : "block"}
-          gap="0.5rem"
-          justifyContent="center"
-          minHeight="calc(100vh - 80px)"
-        >
-          <Suspense fallback={<></>}>
-            <Box flexBasis={isNonMobileScreens ? "15%" : undefined}>
-              <UserWidget userId={_id} picturePath={picturePath} />
-            </Box>
-
-            <Box
-              flexBasis={isNonMobileScreens ? "55%" : undefined}
-              mt={isNonMobileScreens ? undefined : "2rem"}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: isNonMobileScreens ? "calc(100vh - 120px)" : "auto",
-              }}
-            >
-              <Box sx={{ flex: 1 }}>
-                <MyPostWidget picturePath={picturePath} />
-                <PostsWidget userId={_id} />
-              </Box>
-            </Box>
-
-            <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-              <ChatWidget userId={_id} picturePath={picturePath} />
-            </Box>
-          </Suspense>
-        </Box>
+        {role === "admin" ? renderAdminContent() : renderUserContent()}
 
         {loading && (
           <Backdrop

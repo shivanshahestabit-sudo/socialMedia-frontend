@@ -4,6 +4,7 @@ const initialState = {
   mode: "dark",
   user: null,
   token: null,
+  role: null,
   posts: [],
 };
 
@@ -17,10 +18,12 @@ export const authSlice = createSlice({
     setLogin: (state, action) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.role = action.payload.role;
     },
     setLogout: (state) => {
       state.user = null;
       state.token = null;
+      state.role = null;
     },
     setPosts: (state, action) => {
       state.posts = action.payload.posts;

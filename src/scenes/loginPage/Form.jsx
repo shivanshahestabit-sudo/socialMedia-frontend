@@ -45,6 +45,7 @@ const initialValuesRegister = {
   location: "",
   occupation: "",
   picture: null,
+  role: "user",
 };
 
 const initialValuesLogin = {
@@ -122,7 +123,7 @@ const Form = () => {
       }
 
       showMessage("Login successful!", "success");
-      dispatch(setLogin({ user: result.user, token: result.token }));
+      dispatch(setLogin({ user: result.user, token: result.token, role: result?.user?.role }));
       onSubmitProps.resetForm();
       navigate("/home");
     } catch (error) {
