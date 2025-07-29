@@ -15,6 +15,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FlexBetween from "components/FlexBetween";
+import BaseUrl from "apis/baseUrl";
 
 const editProfileSchema = yup.object().shape({
   firstName: yup.string().required("Required"),
@@ -44,7 +45,7 @@ const EditProfileDialog = ({ open, onClose, user, token, setUser }) => {
 
     console.log("JSON Data to send:", jsonData);
 
-    const response = await fetch(`http://localhost:3001/users/${user._id}`, {
+    const response = await fetch(`${BaseUrl}/users/${user._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

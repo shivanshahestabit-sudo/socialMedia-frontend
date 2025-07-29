@@ -11,6 +11,7 @@ import EditProfileDialog from "components/EditProfile";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import BaseUrl from "apis/baseUrl";
 
 const UserWidget = ({ userId, picturePath }) => {
   const [user, setUser] = useState(null);
@@ -26,7 +27,7 @@ const UserWidget = ({ userId, picturePath }) => {
 
   const getUser = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/users/${userId}`, {
+      const response = await fetch(`${BaseUrl}/users/${userId}`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });

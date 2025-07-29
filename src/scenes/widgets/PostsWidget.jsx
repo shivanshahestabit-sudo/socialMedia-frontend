@@ -9,6 +9,7 @@ import {
   ArrowUpward,
   ArrowDownward,
 } from "@mui/icons-material";
+import BaseUrl from "apis/baseUrl";
 
 const PostsWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
@@ -26,7 +27,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3001/posts?page=${page}&limit=${postsPerPage}&sort=${sort}`,
+        `${BaseUrl}/posts?page=${page}&limit=${postsPerPage}&sort=${sort}`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -62,7 +63,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3001/posts/${userId}/posts?page=${page}&limit=${postsPerPage}&sort=${sort}`,
+        `${BaseUrl}/posts/${userId}/posts?page=${page}&limit=${postsPerPage}&sort=${sort}`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },

@@ -20,6 +20,7 @@ import { setLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
 import GoogleLogin from "components/googleSocialLogin";
+import BaseUrl from "apis/baseUrl";
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
@@ -80,7 +81,7 @@ const Form = () => {
       formData.append("picturePath", values.picture.name);
 
       setLoading(true);
-      const response = await fetch("http://localhost:3001/auth/register", {
+      const response = await fetch(`${BaseUrl}/auth/register`, {
         method: "POST",
         body: formData,
       });
@@ -106,7 +107,7 @@ const Form = () => {
   const login = async (values, onSubmitProps) => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3001/auth/login", {
+      const response = await fetch(`${BaseUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

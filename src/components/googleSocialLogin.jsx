@@ -3,6 +3,7 @@ import { Box, Typography, Divider, useTheme } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { setLogin } from "state";
 import { useNavigate } from "react-router-dom";
+import BaseUrl from "apis/baseUrl";
 
 const GoogleLogin = ({
   onSuccess,
@@ -86,7 +87,7 @@ const GoogleLogin = ({
 
   const googleAuth = async (payload) => {
     try {
-      const response = await fetch("http://localhost:3001/auth/social-login", {
+      const response = await fetch(`${BaseUrl}/auth/social-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

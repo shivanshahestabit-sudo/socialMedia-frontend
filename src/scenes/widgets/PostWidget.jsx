@@ -26,6 +26,7 @@ import {
 import WidgetWrapper from "components/WidgetWrapper";
 import FlexBetween from "components/FlexBetween";
 import React from "react";
+import BaseUrl from "apis/baseUrl";
 
 const PostWidget = React.memo(
   ({
@@ -66,7 +67,7 @@ const PostWidget = React.memo(
 
     const patchLike = async () => {
       const response = await fetch(
-        `http://localhost:3001/posts/${postId}/like`,
+        `${BaseUrl}/posts/${postId}/like`,
         {
           method: "PATCH",
           headers: {
@@ -85,7 +86,7 @@ const PostWidget = React.memo(
 
       try {
         const response = await fetch(
-          `http://localhost:3001/posts/${postId}/comment`,
+          `${BaseUrl}/posts/${postId}/comment`,
           {
             method: "POST",
             headers: {
@@ -112,7 +113,7 @@ const PostWidget = React.memo(
 
     const handleDeletePost = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+        const response = await fetch(`${BaseUrl}/posts/${postId}`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -143,7 +144,7 @@ const PostWidget = React.memo(
     const handleEditPost = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/posts/${postId}/${loggedInUserId}`,
+          `${BaseUrl}/posts/${postId}/${loggedInUserId}`,
           {
             method: "PUT",
             headers: {

@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { useSelector } from "react-redux";
+import BaseUrl from "apis/baseUrl";
 
 const ChatPage = () => {
   const [users, setUsers] = useState([]);
@@ -26,7 +27,7 @@ const ChatPage = () => {
   useEffect(() => {
     const fetchChatUsers = async () => {
       try {
-        const res = await fetch("http://localhost:3001/chat/users", {
+        const res = await fetch(`${BaseUrl}/chat/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -46,7 +47,7 @@ const ChatPage = () => {
   }, [token]);
 
   const fetchMessages = async (userId) => {
-    const res = await fetch(`http://localhost:3001/chat/messages/${userId}`, {
+    const res = await fetch(`${BaseUrl}/chat/messages/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -62,7 +63,7 @@ const ChatPage = () => {
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedUser) return;
 
-    const res = await fetch("http://localhost:3001/chat/send", {
+    const res = await fetch(`${BaseUrl}/chat/send`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -87,7 +88,6 @@ const ChatPage = () => {
 
   return (
     <Box height="90vh" p={2} display="flex" flexDirection="column" gap={2}>
-      {/* Top User List */}
       <Paper elevation={3} sx={{ height: 100, overflowX: "auto", p: 1 }}>
         <Typography variant="h6" px={1}>
           Chats
@@ -106,7 +106,7 @@ const ChatPage = () => {
               }}
             >
               <Avatar
-                src={`http://localhost:3001/assets/${user.picturePath}`}
+                src={`${BaseUrl}/assets/${user.picturePath}`}
                 sx={{ margin: "auto", width: 48, height: 48 }}
               />
               <Typography variant="caption" noWrap>

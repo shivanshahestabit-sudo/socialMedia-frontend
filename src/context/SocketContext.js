@@ -1,3 +1,4 @@
+import BaseUrl from "apis/baseUrl";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
@@ -17,7 +18,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io("http://localhost:3001");
+      const newSocket = io(`${BaseUrl}`);
 
       newSocket.on("connect", () => {
         console.log("Connected to server");
@@ -48,7 +49,7 @@ export const SocketProvider = ({ children }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:3001/notifications/${user._id}`,
+        `${BaseUrl}/notifications/${user._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -64,7 +65,7 @@ export const SocketProvider = ({ children }) => {
   const markAsRead = async (notificationId) => {
     try {
       await fetch(
-        `http://localhost:3001/notifications/${notificationId}/read`,
+        `${BaseUrl}/notifications/${notificationId}/read`,
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` },
@@ -83,7 +84,7 @@ export const SocketProvider = ({ children }) => {
   const markAllAsRead = async () => {
     try {
       await fetch(
-        `http://localhost:3001/notifications/user/${user._id}/read-all`,
+        `${BaseUrl}/notifications/user/${user._id}/read-all`,
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` },

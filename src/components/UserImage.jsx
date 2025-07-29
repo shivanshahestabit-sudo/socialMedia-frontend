@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import BaseUrl from "apis/baseUrl";
 
 const UserImage = ({ image, size = "60px" }) => {
   const isExternalUrl =
@@ -11,7 +12,7 @@ const UserImage = ({ image, size = "60px" }) => {
         width={size}
         height={size}
         alt="user"
-        src={isExternalUrl ? image : `http://localhost:3001/assets/${image}`}
+        src={isExternalUrl ? image : `${BaseUrl}/assets/${image}`}
       />
     </Box>
   );
