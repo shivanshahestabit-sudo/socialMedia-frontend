@@ -31,17 +31,23 @@ const HomePage = () => {
       width="100%"
       padding="2rem 6%"
       display={isNonMobileScreens ? "flex" : "block"}
-      gap="0.5rem"
+      gap="2.5rem"
       justifyContent="center"
       minHeight="calc(100vh - 80px)"
     >
       <Suspense fallback={<></>}>
-        <Box flexBasis={isNonMobileScreens ? "15%" : undefined}>
-          <UserWidget userId={_id} picturePath={picturePath} />
+        <Box display="flex" flexDirection="column" gap="1rem" width="30%">
+          <Box flexBasis={isNonMobileScreens ? "10%" : undefined}>
+            <UserWidget userId={_id} picturePath={picturePath} />
+          </Box>
+
+          <Box flexBasis={isNonMobileScreens ? "25%" : undefined}>
+            <ChatWidget userId={_id} picturePath={picturePath} />
+          </Box>
         </Box>
 
         <Box
-          flexBasis={isNonMobileScreens ? "55%" : undefined}
+          flexBasis={isNonMobileScreens ? "75%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
           sx={{
             display: "flex",
@@ -53,10 +59,6 @@ const HomePage = () => {
             <MyPostWidget picturePath={picturePath} />
             <PostsWidget userId={_id} />
           </Box>
-        </Box>
-
-        <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-          <ChatWidget userId={_id} picturePath={picturePath} />
         </Box>
       </Suspense>
     </Box>

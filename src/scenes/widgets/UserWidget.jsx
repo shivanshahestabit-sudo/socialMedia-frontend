@@ -52,6 +52,7 @@ const UserWidget = ({ userId, picturePath }) => {
         gap="0.5rem"
         pb="1.1rem"
         onClick={() => navigate(`/profile/${userId}`)}
+        justifyContent="center !important"
       >
         <FlexBetween gap={location.pathname !== "/home" ? "3rem" : "1rem"}>
           <UserImage image={picturePath} />

@@ -87,10 +87,10 @@ const ChatPage = () => {
   };
 
   return (
-    <Box height="90vh" p={2} display="flex" flexDirection="column" gap={2}>
+    <Box height="90vh" display="flex" flexDirection="column" gap={2}>
       <Paper elevation={3} sx={{ height: 100, overflowX: "auto", p: 1 }}>
-        <Typography variant="h6" px={1}>
-          Chats
+        <Typography variant="h3" px={2} marginBottom={1} marginTop={1}>
+          Users to Chat With
         </Typography>
         <Divider />
         <Box display="flex" gap={2} mt={1} sx={{ overflowX: "auto", px: 1 }}>
