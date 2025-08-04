@@ -36,7 +36,7 @@ const HomePage = () => {
       minHeight="calc(100vh - 80px)"
     >
       <Suspense fallback={<></>}>
-        <Box display="flex" flexDirection="column" gap="1rem" width="30%">
+        <Box display="flex" flexDirection="column" gap="1rem" width="auto">
           <Box flexBasis={isNonMobileScreens ? "10%" : undefined}>
             <UserWidget userId={_id} picturePath={picturePath} />
           </Box>
