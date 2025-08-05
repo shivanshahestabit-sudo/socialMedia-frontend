@@ -7,3 +7,6 @@ build/
 node_modules
 build
 dist
+.env.development
+.env.production
+.env.staging

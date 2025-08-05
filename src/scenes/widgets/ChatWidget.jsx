@@ -16,12 +16,14 @@ import ChatUsersList from "./ChatList";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import { useSocket } from "../../context/SocketContext";
+import { handleAuthError, isAuthError } from "utils/authUtils.js";
+import { useDispatch } from "react-redux";
 
 const ChatPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const dispatch = useDispatch();
   const { palette } = useTheme();
   const token = useSelector((state) => state.token);
   const currentUser = useSelector((state) => state.user);
@@ -108,18 +110,27 @@ const ChatPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(Array.isArray(data) ? data : []);
-        scrollToBottom();
+      const data = await res.json();
 
-        markMessagesRead(userId);
-      } else {
-        console.error("Failed to fetch messages");
+      if (!res.ok) {
+        if (res.status === 401 || isAuthError({ message: data.message })) {
+          handleAuthError(dispatch);
+          return;
+        }
+        console.error("Failed to fetch messages:", data.message);
         setMessages([]);
+        return;
       }
+
+      setMessages(Array.isArray(data) ? data : []);
+      scrollToBottom();
+      markMessagesRead(userId);
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      if (isAuthError(error)) {
+        handleAuthError(dispatch);
+      } else {
+        console.error("Error fetching messages:", error);
+      }
       setMessages([]);
     } finally {
       setLoading(false);
@@ -148,11 +159,21 @@ const ChatPage = () => {
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Failed to send message");
+        if (res.status === 401 || isAuthError({ message: data.message })) {
+          handleAuthError(dispatch);
+          return;
+        }
+        throw new Error(data.message || "Failed to send message");
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      if (isAuthError(error)) {
+        handleAuthError(dispatch);
+      } else {
+        console.error("Error sending message:", error);
+      }
     }
   };
 

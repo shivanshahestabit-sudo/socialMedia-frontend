@@ -21,6 +21,7 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
+import { handleAuthError, isAuthError } from "utils/authUtils.js";
 import BaseUrl from "apis/baseUrl";
 
 const MyPostWidget = ({ picturePath }) => {
@@ -36,23 +37,49 @@ const MyPostWidget = ({ picturePath }) => {
   const medium = palette.neutral.medium;
 
   const handlePost = async () => {
-    const formData = new FormData();
-    formData.append("userId", _id);
-    formData.append("description", post);
-    if (image) {
-      formData.append("picture", image);
-      formData.append("picturePath", image.name);
-    }
+    try {
+      const formData = new FormData();
+      formData.append("userId", _id);
+      formData.append("description", post);
+      if (image) {
+        formData.append("picture", image);
+        formData.append("picturePath", image.name);
+      }
 
-    const response = await fetch(`${BaseUrl}/posts`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    const posts = await response.json();
-    dispatch(setPosts({ posts }));
-    setImage(null);
-    setPost("");
+      const response = await fetch(`${BaseUrl}/posts`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (
+          response.status === 401 ||
+          isAuthError({ message: errorData.message })
+        ) {
+          console.warn("Authentication error detected, logging out user");
+          handleAuthError(dispatch);
+          return;
+        }
+
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      const posts = await response.json();
+      dispatch(setPosts({ posts }));
+      setImage(null);
+      setPost("");
+    } catch (err) {
+      console.error("Failed to create post", err);
+
+      if (isAuthError(err)) {
+        console.warn("Authentication error in catch block, logging out user");
+        handleAuthError(dispatch);
+        return;
+      }
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -128,8 +155,7 @@ const MyPostWidget = ({ picturePath }) => {
 
       <FlexBetween>
         {isNonMobileScreens ? (
-          <>
-          </>
+          <></>
         ) : (
           <FlexBetween gap="0.25rem">
             <MoreHorizOutlined sx={{ color: mediumMain }} />

@@ -10,6 +10,7 @@ import {
   ArrowDownward,
 } from "@mui/icons-material";
 import BaseUrl from "apis/baseUrl";
+import { handleAuthError, isAuthError } from "utils/authUtils";
 
 const PostsWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
@@ -33,7 +34,16 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401 || isAuthError({ message: data.message })) {
+          handleAuthError(dispatch);
+          return;
+        }
+        throw new Error(data.message);
+      }
 
       if (Array.isArray(data.posts)) {
         dispatch(setPosts({ posts: data.posts }));
@@ -53,7 +63,11 @@ const PostsWidget = ({ userId, isProfile = false }) => {
         console.warn("Unexpected post data format", data);
       }
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      if (isAuthError(error)) {
+        handleAuthError(dispatch);
+      } else {
+        console.error("Error fetching posts:", error);
+      }
     } finally {
       setLoading(false);
     }
@@ -69,7 +83,16 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401 || isAuthError({ message: data.message })) {
+          handleAuthError(dispatch);
+          return;
+        }
+        throw new Error(data.message);
+      }
 
       if (data.posts) {
         dispatch(setPosts({ posts: data.posts }));
@@ -83,7 +106,11 @@ const PostsWidget = ({ userId, isProfile = false }) => {
         setCurrentPage(1);
       }
     } catch (error) {
-      console.error("Error fetching user posts:", error);
+      if (isAuthError(error)) {
+        handleAuthError(dispatch);
+      } else {
+        console.error("Error fetching user posts:", error);
+      }
     } finally {
       setLoading(false);
     }

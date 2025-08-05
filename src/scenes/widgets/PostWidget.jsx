@@ -27,6 +27,7 @@ import WidgetWrapper from "components/WidgetWrapper";
 import FlexBetween from "components/FlexBetween";
 import React from "react";
 import BaseUrl from "apis/baseUrl";
+import { handleAuthError, isAuthError } from "utils/authUtils.js";
 
 const PostWidget = React.memo(
   ({
@@ -66,48 +67,75 @@ const PostWidget = React.memo(
     );
 
     const patchLike = async () => {
-      const response = await fetch(
-        `${BaseUrl}/posts/${postId}/like`,
-        {
+      try {
+        const response = await fetch(`${BaseUrl}/posts/${postId}/like`, {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ userId: loggedInUserId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (
+            response.status === 401 ||
+            isAuthError({ message: data.message })
+          ) {
+            handleAuthError(dispatch);
+            return;
+          }
+          throw new Error(data.message || `HTTP ${response.status}`);
         }
-      );
-      const updatedPost = await response.json();
-      dispatch(setPost({ post: updatedPost }));
+
+        dispatch(setPost({ post: data }));
+      } catch (err) {
+        console.error("Failed to like post:", err);
+        if (isAuthError(err)) {
+          handleAuthError(dispatch);
+        }
+      }
     };
 
     const handleAddComment = async () => {
       if (!comment.trim()) return;
 
       try {
-        const response = await fetch(
-          `${BaseUrl}/posts/${postId}/comment`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: loggedInUserId,
-              comment: comment.trim(),
-            }),
-          }
-        );
+        const response = await fetch(`${BaseUrl}/posts/${postId}/comment`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: loggedInUserId,
+            comment: comment.trim(),
+          }),
+        });
 
-        if (response.ok) {
-          const updatedPost = await response.json();
-          dispatch(setPost({ post: updatedPost }));
-          setComment("");
-          refreshPosts?.();
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (
+            response.status === 401 ||
+            isAuthError({ message: data.message })
+          ) {
+            handleAuthError(dispatch);
+            return;
+          }
+          throw new Error(data.message || `HTTP ${response.status}`);
         }
+
+        dispatch(setPost({ post: data }));
+        setComment("");
+        refreshPosts?.();
       } catch (error) {
         console.error("Error adding comment:", error);
+        if (isAuthError(error)) {
+          handleAuthError(dispatch);
+        }
       }
     };
 
@@ -122,15 +150,26 @@ const PostWidget = React.memo(
           body: JSON.stringify({ userId: loggedInUserId }),
         });
 
-        if (response.ok) {
-          setDeleteDialogOpen(false);
-          refreshPosts?.();
-        } else {
-          const errorData = await response.json();
-          console.error("Error deleting post:", errorData.message);
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (
+            response.status === 401 ||
+            isAuthError({ message: data.message })
+          ) {
+            handleAuthError(dispatch);
+            return;
+          }
+          throw new Error(data.message || `HTTP ${response.status}`);
         }
+
+        setDeleteDialogOpen(false);
+        refreshPosts?.();
       } catch (error) {
         console.error("Error deleting post:", error);
+        if (isAuthError(error)) {
+          handleAuthError(dispatch);
+        }
       }
     };
 
@@ -159,15 +198,26 @@ const PostWidget = React.memo(
         );
 
         const data = await response.json();
-        if (response.ok) {
-          dispatch(setPost({ post: data.post }));
-          refreshPosts?.();
-          setEditDialogOpen(false);
-        } else {
-          console.error("Error updating post:", data.message);
+
+        if (!response.ok) {
+          if (
+            response.status === 401 ||
+            isAuthError({ message: data.message })
+          ) {
+            handleAuthError(dispatch);
+            return;
+          }
+          throw new Error(data.message || `HTTP ${response.status}`);
         }
+
+        dispatch(setPost({ post: data.post }));
+        refreshPosts?.();
+        setEditDialogOpen(false);
       } catch (err) {
-        console.error("Failed to update post:", err.message);
+        console.error("Failed to update post:", err);
+        if (isAuthError(err)) {
+          handleAuthError(dispatch);
+        }
       }
     };
 

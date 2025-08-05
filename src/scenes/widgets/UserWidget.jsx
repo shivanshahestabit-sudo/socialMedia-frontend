@@ -11,8 +11,9 @@ import EditProfileDialog from "components/EditProfile";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { setLogin } from "state"; // Import the setLogin action
+import { setLogin } from "state";
 import BaseUrl from "apis/baseUrl";
+import { handleAuthError, isAuthError } from "utils/authUtils.js";
 
 const UserWidget = ({ userId, picturePath }) => {
   const [user, setUser] = useState(null);
@@ -35,22 +36,46 @@ const UserWidget = ({ userId, picturePath }) => {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (
+          response.status === 401 ||
+          isAuthError({ message: errorData.message })
+        ) {
+          console.warn("Authentication error detected, logging out user");
+          handleAuthError(dispatch);
+          return;
+        }
+
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
       const data = await response.json();
       setUser(data);
     } catch (err) {
       console.error("Failed to fetch user", err);
+
+      if (isAuthError(err)) {
+        console.warn("Authentication error in catch block, logging out user");
+        handleAuthError(dispatch);
+        return;
+      }
     }
   };
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
-    
+
     if (loggedInUser && updatedUser._id === loggedInUser._id) {
-      dispatch(setLogin({
-        user: updatedUser,
-        token: token,
-        role: role
-      }));
+      dispatch(
+        setLogin({
+          user: updatedUser,
+          token: token,
+          role: role,
+        })
+      );
     }
   };
 
@@ -118,11 +143,15 @@ const UserWidget = ({ userId, picturePath }) => {
       <Box p="1rem 0">
         <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
           <LocationOnOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{userLocation ? userLocation : "Unknown Location"}</Typography>
+          <Typography color={medium}>
+            {userLocation ? userLocation : "Unknown Location"}
+          </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap="1rem">
           <WorkOutlineOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{occupation ? occupation : "Unknown Occupation"}</Typography>
+          <Typography color={medium}>
+            {occupation ? occupation : "Unknown Occupation"}
+          </Typography>
         </Box>
       </Box>
 
