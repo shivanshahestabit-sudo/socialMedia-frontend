@@ -133,40 +133,23 @@ const ChatPage = () => {
   };
 
   const sendMessage = async (messageData) => {
-    if (!selectedUser || (!messageData.text && !messageData.image)) return;
+    if (!selectedUser || !messageData.text) return;
 
     try {
-      socketSendMessage({
-        senderId: currentUser._id,
-        receiverId: selectedUser._id,
-        content: messageData.text,
-        text: messageData.text,
-        image: messageData.image,
-      });
-
-      const formData = new FormData();
-      formData.append("receiverId", selectedUser._id);
-
-      if (messageData.text) {
-        formData.append("content", messageData.text);
-      }
-
-      if (messageData.imageFile) {
-        formData.append("image", messageData.imageFile);
-      } else if (messageData.image) {
-        formData.append("imageData", messageData.image);
-      }
-
       const res = await fetch(`${BaseUrl}/chat/send`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          receiverId: selectedUser._id,
+          content: messageData.text,
+        }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to send message via HTTP");
+        throw new Error("Failed to send message");
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -232,9 +215,7 @@ const ChatPage = () => {
               flexGrow={1}
               overflow="auto"
               p={2}
-              sx={{
-                backgroundColor: palette.background.default,
-              }}
+              sx={{ backgroundColor: palette.background.default }}
             >
               {loading ? (
                 <Box display="flex" justifyContent="center" mt={4}>
@@ -263,7 +244,8 @@ const ChatPage = () => {
                       <Box
                         key={msg._id || index}
                         display="flex"
-                        flexDirection={isOwn ? "row-reverse" : "row"}
+                        flexDirection="row"
+                        justifyContent={isOwn ? "flex-end" : "flex-start"}
                         alignItems="flex-end"
                         gap={1}
                         mb={1}
@@ -286,53 +268,63 @@ const ChatPage = () => {
                           </Avatar>
                         )}
 
-                        <Box
-                          maxWidth="60%"
-                          bgcolor={isOwn ? palette.primary.main : "brown"}
-                          color={isOwn ? "white" : "text.primary"}
-                          borderRadius={2}
-                          p={1.5}
-                          sx={{
-                            wordBreak: "break-word",
-                            borderBottomLeftRadius:
-                              !isOwn && showAvatar ? 4 : 16,
-                            borderBottomRightRadius:
-                              isOwn && showAvatar ? 4 : 16,
-                          }}
-                        >
-                          {msg.image && (
-                            <Box mb={msg.content ? 1 : 0}>
-                              <img
-                                src={msg.image}
-                                alt="Message attachment"
-                                style={{
-                                  maxWidth: "200px",
-                                  width: "100%",
-                                  borderRadius: 8,
-                                  display: "block",
-                                }}
-                              />
-                            </Box>
-                          )}
-
-                          {(msg.content || msg.text) && (
+                        {isOwn && (
+                          <Box
+                            maxWidth="60%"
+                            bgcolor={palette.primary.main}
+                            color="white"
+                            borderRadius={2}
+                            p={1.5}
+                            sx={{
+                              wordBreak: "break-word",
+                              borderBottomRightRadius: showAvatar ? 4 : 16,
+                            }}
+                          >
                             <Typography variant="body2">
                               {msg.content || msg.text}
                             </Typography>
-                          )}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                opacity: 0.7,
+                                display: "block",
+                                textAlign: "right",
+                                mt: 0.5,
+                              }}
+                            >
+                              {formatMessageTime(msg.createdAt)}
+                            </Typography>
+                          </Box>
+                        )}
 
-                          <Typography
-                            variant="caption"
+                        {!isOwn && (
+                          <Box
+                            maxWidth="60%"
+                            bgcolor="brown"
+                            color="white"
+                            borderRadius={2}
+                            p={1.5}
                             sx={{
-                              opacity: 0.7,
-                              display: "block",
-                              textAlign: isOwn ? "right" : "left",
-                              mt: 0.5,
+                              wordBreak: "break-word",
+                              borderBottomLeftRadius: showAvatar ? 4 : 16,
                             }}
                           >
-                            {formatMessageTime(msg.createdAt)}
-                          </Typography>
-                        </Box>
+                            <Typography variant="body2">
+                              {msg.content || msg.text}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                opacity: 0.7,
+                                display: "block",
+                                textAlign: "left",
+                                mt: 0.5,
+                              }}
+                            >
+                              {formatMessageTime(msg.createdAt)}
+                            </Typography>
+                          </Box>
+                        )}
 
                         {isOwn && (
                           <Avatar

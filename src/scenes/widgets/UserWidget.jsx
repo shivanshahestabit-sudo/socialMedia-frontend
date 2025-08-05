@@ -8,9 +8,10 @@ import UserImage from "components/UserImage";
 import FlexBetween from "components/FlexBetween";
 import WidgetWrapper from "components/WidgetWrapper";
 import EditProfileDialog from "components/EditProfile";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { setLogin } from "state"; // Import the setLogin action
 import BaseUrl from "apis/baseUrl";
 
 const UserWidget = ({ userId, picturePath }) => {
@@ -20,7 +21,10 @@ const UserWidget = ({ userId, picturePath }) => {
   const { palette } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
+  const loggedInUser = useSelector((state) => state.user);
+  const role = useSelector((state) => state.role);
   const dark = palette.neutral.dark;
   const medium = palette.neutral.medium;
   const main = palette.neutral.main;
@@ -35,6 +39,18 @@ const UserWidget = ({ userId, picturePath }) => {
       setUser(data);
     } catch (err) {
       console.error("Failed to fetch user", err);
+    }
+  };
+
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+    
+    if (loggedInUser && updatedUser._id === loggedInUser._id) {
+      dispatch(setLogin({
+        user: updatedUser,
+        token: token,
+        role: role
+      }));
     }
   };
 
@@ -102,11 +118,11 @@ const UserWidget = ({ userId, picturePath }) => {
       <Box p="1rem 0">
         <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
           <LocationOnOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{userLocation}</Typography>
+          <Typography color={medium}>{userLocation ? userLocation : "Unknown Location"}</Typography>
         </Box>
         <Box display="flex" alignItems="center" gap="1rem">
           <WorkOutlineOutlined fontSize="large" sx={{ color: main }} />
-          <Typography color={medium}>{occupation}</Typography>
+          <Typography color={medium}>{occupation ? occupation : "Unknown Occupation"}</Typography>
         </Box>
       </Box>
 
@@ -115,7 +131,7 @@ const UserWidget = ({ userId, picturePath }) => {
         onClose={() => setEditDialogOpen(false)}
         user={user}
         token={token}
-        setUser={setUser}
+        setUser={updateUser} // Use the custom updateUser function
       />
     </WidgetWrapper>
   );

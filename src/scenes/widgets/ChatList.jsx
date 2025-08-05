@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import {
   Box,
-  Avatar,
   Typography,
   CircularProgress,
   Alert,
   Badge,
 } from "@mui/material";
+import UserImage from "components/UserImage";
 
 const ChatUsersList = ({
   token,
@@ -38,7 +38,6 @@ const ChatUsersList = ({
         if (data.success && Array.isArray(data.users)) {
           setUsers(data.users);
         } else if (Array.isArray(data)) {
-          // Fallback for direct array response
           setUsers(data);
         } else {
           console.error("Unexpected response format:", data);
@@ -121,24 +120,28 @@ const ChatUsersList = ({
             transition: "background-color 0.2s",
           }}
         >
-          <Badge
-            overlap="circular"
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            variant="dot"
-            color={onlineUsers.includes(user._id) ? "success" : "default"}
-            invisible={!onlineUsers.includes(user._id)}
-          >
-            <Avatar
-              src={
-                user.picturePath
-                  ? `${BaseUrl}/assets/${user.picturePath}`
-                  : undefined
-              }
-              sx={{ margin: "auto", width: 48, height: 48 }}
+          <Box sx={{ position: "relative", display: "inline-block" }}>
+            <Badge
+              overlap="circular"
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              variant="dot"
+              color={onlineUsers.includes(user._id) ? "success" : "default"}
+              invisible={!onlineUsers.includes(user._id)}
+              sx={{
+                "& .MuiBadge-badge": {
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  border: "2px solid white",
+                }
+              }}
             >
-              {!user.picturePath && user.firstName?.[0]}
-            </Avatar>
-          </Badge>
+              <UserImage 
+                image={user.picturePath} 
+                size="48px" 
+              />
+            </Badge>
+          </Box>
           <Typography variant="caption" noWrap sx={{ mt: 0.5 }}>
             {user.firstName}
           </Typography>
